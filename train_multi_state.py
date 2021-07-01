@@ -285,7 +285,7 @@ def check_data(device, test_loader, net, criterion):
     
     return sum(loss_log)/len(loss_log)# MSE
 
-def check_scatter(device, test_loader, net, plot_path, epoch, train_test):
+def check_scatter(device, test_loader, net, plot_path, epoch, train_test, logger=None):
     net.eval()
     tgt_log = np.zeros((1,1))
     pred_log = np.zeros((1,1))
@@ -303,7 +303,7 @@ def check_scatter(device, test_loader, net, plot_path, epoch, train_test):
         pred_log = np.concatenate([pred_log, out_npy[:,[0]]], axis=0)
         tgt_log = np.concatenate([tgt_log, tgt_npy[:,[0]]], axis=0)
     
-    scatter_plot(pred_log, tgt_log, plot_path, epoch, train_test)
+    scatter_plot(pred_log, tgt_log, plot_path, epoch, train_test, logger)
 
 def scatter_plot(pred, tgt, plot_path, epoch, train_test, logger=None):
     # culc corr

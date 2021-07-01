@@ -7,7 +7,7 @@
 # 4 : loss_fn
 # 5 : scheduling method
 
-# bash recipes/run_train_single_state.sh 0 200 0.0001 mse No
+# bash recipes/run_train_single_state.sh 0 200 0.0001 mse
 
 statelist=("Alabama" \
         "Alaska" \
@@ -79,5 +79,5 @@ for state in ${statelist[@]}; do
                                 -hpost 1024 \
                                 -us ${state} \
                                 -loss ${4} \
-                                -sch ${5}
+                                -sch No
 done

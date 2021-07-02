@@ -39,6 +39,7 @@ def main():
     parser.add_argument('--outpath', '-out', default="./checkout/test", type=str, help='root of output directory')
     parser.add_argument('--check_state', '-state', default="Alabama", type=str)
     parser.add_argument('--epoch_num', '-epn', default=9, type=int, help="学習済みモデルのエポック数")
+    parser.add_argument('--dbg', '-dbg', action="store_true")
     args = parser.parse_args()
 
     model_path = args.model_path
@@ -87,7 +88,7 @@ def main():
 
     if use_state == "all":
         model_name = model_name+"_{}".format(check_state)
-    util.set_directories(outpath, model_name, ["scatter", "forcast", "log"], False)
+    util.set_directories(outpath, model_name, ["scatter", "forcast", "log"], args.dbg)
     log_path = os.path.join(outpath, model_name, "log")
     scatter_path = os.path.join(outpath, model_name, "scatter")
     forcast_path = os.path.join(outpath, model_name, "forcast")
@@ -114,46 +115,54 @@ def main():
     # 出力するもの
     #  - scatter plot
     #  - 1時点先を予測し続けたplot
+    pred_list = np.zeros((1, predict_step))# (1, pred_len(1時点先, 2時点先))
     for iter, (x, y, tgt, key) in enumerate(test_loader):
         x, y, tgt = x.to(device), y.to(device), tgt.to(device)
 
-        if iter == 0:
-            pred_list = x.to('cpu').detach().numpy().copy()[0,:,0]# (input_len, )
-
-        tgt = tgt.squeeze(-1)
+        tgt = tgt[:,:,0]
 
         out = net.generate(x, tgt.shape[1], y[:,[0],:])# (1(=batch), pred_len)
-        out = out.to('cpu').detach().numpy().copy()[0,:]
+        out = out.to('cpu').detach().numpy().copy()
 
-        pred_list = np.concatenate([pred_list, out])
+        pred_list = np.concatenate([pred_list, out], axis=0)
         print(iter)
+    pred_list = pred_list[1:]
+    D = []
+    for i in range(predict_step):
+        tmp = np.concatenate([all_data[:(input_step+i)], pred_list[:,i], all_data[(all_data.shape[0]-(predict_step - (i + 1))):]])
+        D.append(tmp)
 
-    # scatter plot
-    corr = scipy.stats.pearsonr(pred_list, all_data)
-    logger({"corr" : corr})
+    for step_num, tmp_data in enumerate(D):
+        n = step_num + 1
 
-    np.save(os.path.join(scatter_path, "pred_epoch{}".format(epoch_num)), pred_list)
-    np.save(os.path.join(scatter_path, "tgt"), tgt)
+        # scatter plot
+        corr = scipy.stats.pearsonr(tmp_data, all_data)
+        logger({"corr" : corr})
 
-    fig, ax = plt.subplots(figsize=(12,8))
-    ax.set_xlim(-1, 1)
-    ax.set_ylim(-1, 1)
-    ax.scatter(pred_list,all_data)
-    ax.set_title("{}  epoch : {}".format(check_state, epoch_num))
-    ax.set_xlabel("predict")
-    ax.set_ylabel("true")
-    ax.text(-0.95, -0.5, "corr : {}".format(corr))
-    ax.axhline(0)
-    ax.axvline(0)
-    plt.savefig(os.path.join(scatter_path, "{}  scatter_epoch{}.png".format(check_state,epoch_num)))
-    plt.close()
+        np.save(os.path.join(scatter_path, "pred{}_epoch{}".format(n, epoch_num)), pred_list)
+        np.save(os.path.join(scatter_path, "tgt"), tgt)
+
+        fig, ax = plt.subplots(figsize=(12,8))
+        ax.set_xlim(-1, 1)
+        ax.set_ylim(-1, 1)
+        ax.scatter(tmp_data,all_data)
+        ax.set_title("{} pred_{} epoch : {}".format(check_state, n, epoch_num))
+        ax.set_xlabel("predict")
+        ax.set_ylabel("true")
+        ax.text(-0.95, -0.5, "corr : {}".format(corr))
+        ax.axhline(0)
+        ax.axvline(0)
+        plt.savefig(os.path.join(scatter_path, "{}_pred{}_scatter_epoch{}.png".format(check_state,n,epoch_num)))
+        plt.close()
 
     # forcast plot
     fig, ax = plt.subplots(figsize=(12,8))
     ax.plot(all_data, label="true")
-    ax.plot(pred_list, label="forcast")
+
+    for ind, d in enumerate(D):
+        ax.plot(d, label="forcast_{}".format(ind+1))
     ax.legend()
-    ax.set_title("1 step forcast plot ({}) epoch {}".format(check_state, epoch_num))
+    ax.set_title("forcast plot ({}) epoch {}".format(check_state, epoch_num))
     plt.savefig(os.path.join(scatter_path, "{}  forcast_epoch{}.png".format(check_state, epoch_num)))
     plt.close()
 

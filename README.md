@@ -13,7 +13,7 @@
 ### データの準備
 
 1. CDCの[サイト](https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html)より州ごとのインフルエンザの患者数データを取得
-2. `bash recipes/set_data.sh path_to_downloaded_data path_to_prepared_data`を実行
+2. `bash recipes/set_data.sh path_to_downloaded_data`を実行
 
 ### 実行方法
 

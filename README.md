@@ -1,4 +1,4 @@
-# "Deep Transformer Models for Time Series Forecasting: The Influenza Prevalence Case"
+# Deep Transformer Models for Time Series Forecasting: The Influenza Prevalence Case
 
 [日本語はこちら](./README_jp.md)
 

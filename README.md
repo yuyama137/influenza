@@ -1,43 +1,41 @@
-# 再現実装 : "Deep Transformer Models for Time Series Forecasting: The Influenza Prevalence Case"
+# "Deep Transformer Models for Time Series Forecasting: The Influenza Prevalence Case"
 
-[論文](https://arxiv.org/abs/2001.08317)の再現実装を行った。
+[日本語はこちら](./README_jp.md)
 
-## 論文について
+**None official** implementation of [this paper](https://arxiv.org/abs/2001.08317).
 
-- Transformerを用いた時系列予測タスクを扱っている。
-- アメリカCDCが提供しているインフルエンザの流行データを用いて実験を行った。
-- LSTM, RNN, ARIMAなどの既存手法よりも良い精度で1週間先の流行を予測することができた。
+## About paper
 
-## 手順
+- The study deals with a time-series forecasting task using Transformer.
+- Experiments were conducted using influenza epidemic data provided by the US CDC.
+- Predicted epidemics one week ahead with better accuracy than existing methods such as LSTM, RNN, ARIMA, etc.
 
-### データの準備
+## usege
 
-1. CDCの[サイト](https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html)より州ごとのインフルエンザの患者数データを取得(あるいは[ここ](https://drive.google.com/file/d/1pAaj9ZZDXr8dXH5L7Q1nNOF2cGuPRL6g/view?usp=sharing))
-2. `bash recipes/set_data.sh path_to_downloaded_data`を実行
+### predict data
 
-### 実行方法
+1. get state-by-state influenza case count data from the web site of [CDC](https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html)
+2. run `bash recipes/set_data.sh path_to_downloaded_data`
 
-#### 州ごとのデータを用いて学習をする時
+### run
+
+#### train with state-by-state data
 
 `bash recipes/run_train_single_state.sh 0 200 0.0001 mse`
 
-詳細は[ここ](recipes/run_train_single_state.sh)参照。
+See [here](recipes/run_train_single_state.sh) for details.
 
-#### 全ての州を用いて学習をする時
+#### train with all states
 
 `bash recipes/run_train_multi_state.sh 0 1 200 0.0001 mse`
 
-詳細は[ここ](recipes/run_train_multi_state.sh)を参照。
+See [here](recipes/run_train_multi_state.sh) for details
 
-## 結果
+## result
 
-全ての州を用いて学習を行った際の1ステップ先の予測。
+One step ahead prediction trained with all states.
 
 ![](./img/multi_texas.png)
-
-### ToDo
-
-- schedulerの適用
 
 ## Reference
 

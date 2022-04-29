@@ -18,7 +18,7 @@
 2. run `bash recipes/set_data.sh path_to_downloaded_data`
 3. Data of each state will be as below.
 
-| id | REAGION | YEAR | WEEK | ili_ratio |
+|  | REAGION | YEAR | WEEK | ili_ratio |
 | ---- | ---- | ---- | ---- | ---- |
 | ... | ... | ... | ... | ... |
 | 30 | oregon | 2020 | 32 | 0.5 |
